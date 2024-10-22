@@ -1,8 +1,7 @@
--- Active: 1729309147950@@127.0.0.1@3306@granja_agricolamysql
+-- Active: 1729024097209@@127.0.0.1@3306@granja_agricolaMYSQL
 CREATE DATABASE granja_agricolaMYSQL;
 
 USE granja_agricolaMYSQL
-
 
 -- Tabla continente
 CREATE TABLE continente (
@@ -10,6 +9,98 @@ CREATE TABLE continente (
     nombre VARCHAR(100) NOT NULL
 );
 
+-- Tabla insumos
+CREATE TABLE insumos (
+    id_insumo INTEGER PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL
+);
+
+-- Tabla unidad_medida
+CREATE TABLE unidad_medida (
+    id_unidad_de_medida INTEGER PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL
+);
+
+-- Tabla precio_venta_u_medida
+CREATE TABLE precio_venta_u_medida (
+    id_precio_venta_u_medida INTEGER PRIMARY KEY,
+    valor DECIMAL NOT NULL
+);
+
+-- Tabla tipo_proceso
+CREATE TABLE tipo_proceso (
+    id_tipo_proceso INTEGER PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL
+);
+
+-- Tabla tipo_maquina
+CREATE TABLE tipo_maquina (
+    id_tipo_maquina INTEGER PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    modelo VARCHAR(100)
+);
+
+-- Tabla maquinaria
+CREATE TABLE maquinaria (
+    id_maquina INTEGER PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    id_tipo_maquina INTEGER,
+    FOREIGN KEY (id_tipo_maquina) REFERENCES tipo_maquina(id_tipo_maquina)
+);
+
+
+
+-- Tabla clientes
+CREATE TABLE clientes (
+    id_cliente INTEGER PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    telefono_cliente VARCHAR(100),
+    email_cliente VARCHAR(100)
+);
+
+
+-- Tabla Cargo
+CREATE TABLE Cargo (
+    id_cargo INTEGER PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL
+);
+
+-- Tabla estados_empleados
+CREATE TABLE estados_empleados (
+    id_estado_empleado INTEGER PRIMARY KEY,
+    estado VARCHAR(50) NOT NULL
+);
+
+-- Tabla estado_vacaciones
+CREATE TABLE estado_vacaciones (
+    id_estado_vacaciones INTEGER PRIMARY KEY,
+    estado VARCHAR(100)
+);
+
+-- Tabla reporte_gastos
+CREATE TABLE reporte_gastos (
+    id_reporte INTEGER PRIMARY KEY,
+    fecha_reporte DATETIME,
+    total DECIMAL
+);
+
+--Tabla tipo_inventario
+CREATE TABLE tipo_inventario (
+    id_tipo_inventario INTEGER PRIMARY KEY,
+    nombre VARCHAR(100)
+);
+
+-- Tabla empleados
+CREATE TABLE empleados (
+    id_empleado INTEGER PRIMARY KEY,
+    id_cargo INTEGER,
+    nombre VARCHAR(100) NOT NULL,
+    salario DECIMAL,
+    correo VARCHAR(100),
+    id_estado_empleado INTEGER,
+    FOREIGN KEY (id_cargo) REFERENCES Cargo(id_cargo),
+    FOREIGN KEY (id_estado_empleado) REFERENCES estados_empleados(id_estado_empleado)
+);
 -- Tabla pais
 CREATE TABLE pais (
     id_pais INTEGER PRIMARY KEY,
@@ -60,12 +151,6 @@ CREATE TABLE compras (
     FOREIGN KEY (id_proveedor) REFERENCES proveedores(id_proveedor)
 );
 
--- Tabla insumos
-CREATE TABLE insumos (
-    id_insumo INTEGER PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL
-);
-
 -- Tabla productos
 CREATE TABLE productos (
     id_producto INTEGER PRIMARY KEY,
@@ -77,16 +162,12 @@ CREATE TABLE productos (
     FOREIGN KEY (id_precio_venta_u_medida) REFERENCES precio_venta_u_medida(id_precio_venta_u_medida)
 );
 
--- Tabla unidad_medida
-CREATE TABLE unidad_medida (
-    id_unidad_de_medida INTEGER PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL
-);
-
--- Tabla precio_venta_u_medida
-CREATE TABLE precio_venta_u_medida (
-    id_precio_venta_u_medida INTEGER PRIMARY KEY,
-    valor DECIMAL NOT NULL
+-- Tabla procesos
+CREATE TABLE procesos (
+    id_proceso INTEGER PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    id_tipo_proceso INTEGER,
+    FOREIGN KEY (id_tipo_proceso) REFERENCES tipo_proceso(id_tipo_proceso)
 );
 
 -- Tabla producto_proceso
@@ -98,42 +179,6 @@ CREATE TABLE producto_proceso (
     FOREIGN KEY (id_proceso) REFERENCES procesos(id_proceso)
 );
 
--- Tabla tipo_proceso
-CREATE TABLE tipo_proceso (
-    id_tipo_proceso INTEGER PRIMARY KEY,
-    nombre VARCHAR(50) NOT NULL
-);
-
--- Tabla procesos
-CREATE TABLE procesos (
-    id_proceso INTEGER PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    id_tipo_proceso INTEGER,
-    FOREIGN KEY (id_tipo_proceso) REFERENCES tipo_proceso(id_tipo_proceso)
-);
-
--- Tabla maquinaria
-CREATE TABLE maquinaria (
-    id_maquina INTEGER PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    id_tipo_maquina INTEGER,
-    FOREIGN KEY (id_tipo_maquina) REFERENCES tipo_maquina(id_tipo_maquina)
-);
-
--- Tabla tipo_maquina
-CREATE TABLE tipo_maquina (
-    id_tipo_maquina INTEGER PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    modelo VARCHAR(100)
-);
-
--- Tabla clientes
-CREATE TABLE clientes (
-    id_cliente INTEGER PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    telefono_cliente VARCHAR(100),
-    email_cliente VARCHAR(100)
-);
 
 -- Tabla ventas
 CREATE TABLE ventas (
@@ -155,30 +200,6 @@ CREATE TABLE pedido (
     FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente),
     FOREIGN KEY (id_venta) REFERENCES ventas(id_venta),
     FOREIGN KEY (id_insumo) REFERENCES insumos(id_insumo)
-);
-
--- Tabla empleados
-CREATE TABLE empleados (
-    id_empleado INTEGER PRIMARY KEY,
-    id_cargo INTEGER,
-    nombre VARCHAR(100) NOT NULL,
-    salario DECIMAL,
-    correo VARCHAR(100),
-    id_estado_empleado INTEGER,
-    FOREIGN KEY (id_cargo) REFERENCES Cargo(id_cargo),
-    FOREIGN KEY (id_estado_empleado) REFERENCES estados_empleados(id_estado_empleado)
-);
-
--- Tabla Cargo
-CREATE TABLE Cargo (
-    id_cargo INTEGER PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL
-);
-
--- Tabla estados_empleados
-CREATE TABLE estados_empleados (
-    id_estado_empleado INTEGER PRIMARY KEY,
-    estado VARCHAR(50) NOT NULL
 );
 
 -- Tabla pago_empleados
@@ -209,18 +230,7 @@ CREATE TABLE vacaciones (
     FOREIGN KEY (id_estado_vacaciones) REFERENCES estado_vacaciones(id_estado_vacaciones)
 );
 
--- Tabla estado_vacaciones
-CREATE TABLE estado_vacaciones (
-    id_estado_vacaciones INTEGER PRIMARY KEY,
-    estado VARCHAR(100)
-);
 
--- Tabla reporte_gastos
-CREATE TABLE reporte_gastos (
-    id_reporte INTEGER PRIMARY KEY,
-    fecha_reporte DATETIME,
-    total DECIMAL
-);
 
 -- Tabla procesos_empleados
 CREATE TABLE procesos_empleados (
@@ -240,18 +250,7 @@ CREATE TABLE procesos_maquinas (
     FOREIGN KEY (id_maquina) REFERENCES maquinaria(id_maquina)
 );
 
-CREATE TABLE pago_empleado_empleados (
-    id_pago_empleado INTEGER,
-    id_empleado INTEGER,
-    FOREIGN KEY (id_pago_empleado) REFERENCES pago_empleados(id_pago_empleado),
-    FOREIGN KEY (id_empleado) REFERENCES empleados(id_empleado)
-);
-
-CREATE TABLE tipo_inventario (
-    id_tipo_inventario INTEGER PRIMARY KEY,
-    nombre VARCHAR(100)
-);
-
+--Tabla inventario
 CREATE TABLE inventario (
     id_inventario INTEGER PRIMARY KEY,
     nombre VARCHAR(100),
@@ -260,3 +259,68 @@ CREATE TABLE inventario (
     FOREIGN KEY (id_tipo_inventario) REFERENCES tipo_inventario(id_tipo_inventario),
     FOREIGN KEY (id_finca) REFERENCES finca(id_finca)
 );
+
+--Tabla pago_empleado_empleados
+CREATE TABLE pago_empleado_empleados (
+    id_pago_empleado INTEGER,
+    id_empleado INTEGER,
+    FOREIGN KEY (id_pago_empleado) REFERENCES pago_empleados(id_pago_empleado),
+    FOREIGN KEY (id_empleado) REFERENCES empleados(id_empleado)
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
