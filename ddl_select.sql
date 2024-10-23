@@ -1,3 +1,4 @@
+-- Active: 1729309147950@@127.0.0.1@3306@granja_agricolamysql
 -- CONSULTAS CON SELECT
 --1. Obtener todos los productos disponibles en la granja.
 SELECT productos.id_producto, productos.nombre FROM productos 
@@ -505,11 +506,171 @@ WHERE e.salario > (
     FROM empleados
 );
 
---76. Listar los empleados cuyo salario está entre el 10% superior de los salarios
+--76. Listar los empleados que reciben un salario superior al promedio de todos los empleados
 SELECT e.nombre AS empleado, e.salario
 FROM empleados e
-WHERE e.salario > (
-    SELECT PERCENTILE_CONT(0.9) WITHIN GROUP (ORDER BY salario)
-    FROM empleados
+WHERE e.salario > (SELECT AVG(salario) FROM empleados);
+
+--77. Contar el número de productos por tipo de producto
+
+SELECT p.tipo_producto, COUNT(p.id_producto) AS total_productos
+FROM productos p
+GROUP BY p.tipo_producto
+HAVING COUNT(p.id_producto) > 0;
+
+
+--78. Mostrar los proveedores que han suministrado más del 20% del total de insumos en la granja
+
+SELECT pr.nombre_empresa AS proveedor, SUM(c.total) AS total_compras
+FROM proveedores pr
+JOIN compras c ON pr.id_proveedor = c.id_proveedor
+GROUP BY pr.id_proveedor
+HAVING SUM(c.total) > (
+    SELECT SUM(total) * 0.20
+    FROM compras
 );
+
+--79. Listar las fincas y la cantidad total de productos que se encuentran en cada una, ordenadas por la cantidad de productos en orden descendente
+
+SELECT f.nombre AS finca, SUM(i.cantidad) AS total_productos
+FROM finca f
+JOIN inventario i ON f.id_finca = i.id_finca
+GROUP BY f.id_finca
+ORDER BY total_productos DESC;
+
+
+--80.  Obtener el promedio de salario de los empleados por cada cargo
+
+SELECT ca.nombre AS cargo, AVG(e.salario) AS promedio_salario
+FROM empleados e
+JOIN Cargo ca ON e.id_cargo = ca.id_cargo
+GROUP BY ca.id_cargo;
+
+--81. Listar las ciudades con la cantidad de fincas que se encuentran en cada una
+SELECT ci.nombre AS ciudad, COUNT(f.id_finca) AS total_fincas
+FROM ciudad ci
+JOIN direccion d ON ci.id_ciudad = d.id_ciudad
+JOIN finca f ON d.id_direccion = f.id_direccion
+GROUP BY ci.id_ciudad;
+
+--82 Obtener el total de compras por proveedor y mostrar solo aquellos que hayan realizado compras superiores a 1000 unidades monetarias
+SELECT p.nombre_empresa AS proveedor, SUM(c.total) AS total_compras
+FROM proveedores p
+JOIN compras c ON p.id_proveedor = c.id_proveedor
+GROUP BY p.id_proveedor
+HAVING SUM(c.total) > 1000;
+
+--83. Obtener el número de empleados que han realizado pagos y el total de pagos realizados por cada uno
+
+SELECT e.nombre AS empleado, COUNT(pe.id_pago_empleado) AS total_pagos
+FROM empleados e
+JOIN pago_empleados pe ON e.id_empleado = pe.id_empleado
+GROUP BY e.id_empleado;
+
+--84. Obtener la cantidad total de insumos comprados por cada proveedor, mostrando solo aquellos que hayan comprado más de 10 insumos
+SELECT i.nombre AS insumo, SUM(v.total) AS total_gastado_en_insumo
+FROM insumos i
+JOIN pedido ped ON i.id_insumo = ped.id_insumo
+JOIN ventas v ON ped.id_venta = v.id_venta
+GROUP BY i.id_insumo
+ORDER BY total_gastado_en_insumo DESC;
+
+--85. La consulta cuenta la cantidad de pedidos realizados para cada insumo
+SELECT i.nombre AS insumo, COUNT(ped.id_pedido) AS cantidad_pedidos
+FROM insumos i
+JOIN pedido ped ON i.id_insumo = ped.id_insumo
+GROUP BY i.id_insumo
+ORDER BY cantidad_pedidos DESC;
+
+--86. Listar las máquinas que aún no han sido utilizadas en ningún proceso
+SELECT m.nombre 
+FROM maquinaria m
+LEFT JOIN procesos_maquinas pm ON m.id_maquina = pm.id_maquina
+WHERE pm.id_maquina IS NULL;
+
+--87.Listar los empleados que no han realizado ninguna venta.
+SELECT e.nombre
+FROM empleados e
+LEFT JOIN ventas v ON e.id_empleado = v.id_empleado
+WHERE v.id_venta IS NULL;
+
+--88. Obtener el nombre y el tipo de las máquinas utilizadas en los procesos.
+
+SELECT m.nombre, tm.nombre AS tipo_maquina
+FROM maquinaria m
+JOIN tipo_maquina tm ON m.id_tipo_maquina = tm.id_tipo_maquina;
+
+--89. Listar los productos y su precio de venta por unidad de medida
+
+SELECT p.nombre AS producto, pv.valor AS precio_venta
+FROM productos p
+JOIN precio_venta_u_medida pv ON p.id_precio_venta_u_medida = pv.id_precio_venta_u_medida;
+
+
+--90. Obtener el inventario y el tipo de inventario de todas las fincas, ordenado por el nombre de la finca
+SELECT f.nombre AS nombre_finca, i.nombre AS nombre_inventario, ti.nombre AS tipo_inventario
+FROM finca f
+JOIN inventario i ON f.id_finca = i.id_finca
+JOIN tipo_inventario ti ON i.id_tipo_inventario = ti.id_tipo_inventario
+ORDER BY f.nombre;
+
+--91. Listar los proveedores y la cantidad total de compras que han realizado
+SELECT p.nombre_empresa AS proveedor, COUNT(c.id_compra) AS total_compras
+FROM proveedores p
+LEFT JOIN compras c ON p.id_proveedor = c.id_proveedor
+GROUP BY p.id_proveedor
+ORDER BY total_compras DESC;
+
+--92. Obtener el nombre y contacto de los proveedores que han realizado al menos una compra
+SELECT p.nombre_empresa, p.contacto_proveedor
+FROM proveedores p
+JOIN compras c ON p.id_proveedor = c.id_proveedor;
+
+--93. Listar los procesos y sus tipos asociados.
+SELECT pr.nombre AS proceso, tp.nombre AS tipo_proceso
+FROM procesos pr
+JOIN tipo_proceso tp ON pr.id_tipo_proceso = tp.id_tipo_proceso;
+
+--94. Obtener el nombre de los empleados y su cargo.
+
+SELECT e.nombre, c.nombre AS cargo
+FROM empleados e
+JOIN Cargo c ON e.id_cargo = c.id_cargo;
+
+--95. Listar todos los insumos utilizados en pedidos realizados por los clientes
+SELECT i.nombre AS insumo
+FROM insumos i
+JOIN pedido p ON i.id_insumo = p.id_insumo;
+
+--96. Obtener la lista de empleados y su salario, junto con el promedio de salario de su respectivo cargo
+
+SELECT e.nombre, e.salario, c.nombre AS cargo, 
+       (SELECT AVG(salario) 
+        FROM empleados 
+        WHERE id_cargo = e.id_cargo) AS promedio_salario
+FROM empleados e
+JOIN Cargo c ON e.id_cargo = c.id_cargo;
+
+--97. istar los empleados y su estado actual (empleado activo o no)
+SELECT e.nombre, ee.estado
+FROM empleados e
+JOIN estados_empleados ee ON e.id_estado_empleado = ee.id_estado_empleado;
+
+
+--98. Obtener el nombre de los productos que están asociados a procesos.
+
+SELECT p.nombre AS producto
+FROM productos p
+JOIN producto_proceso pp ON p.id_producto = pp.id_producto;
+
+--99. Listar las fechas de vacaciones de los empleados
+
+SELECT e.nombre, v.fecha_vacaciones
+FROM empleados e
+JOIN vacaciones v ON e.id_empleado = v.id_empleado;
+
+
+--100. Obtener el total de gastos reportados en todos los reportes de gastos
+SELECT SUM(rg.total) AS total_gastos
+FROM reporte_gastos rg;
 
