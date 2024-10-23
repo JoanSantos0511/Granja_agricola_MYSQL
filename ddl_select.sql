@@ -259,3 +259,159 @@ SELECT v.id_venta, v.total
 FROM ventas v
 WHERE v.total > (SELECT AVG(total) FROM ventas);
 
+--46. Listar las máquinas que se utilizan en exactamente dos procesos
+
+SELECT m.nombre AS nombre_maquina, COUNT(pm.id_proceso) AS total_procesos
+FROM maquinaria m
+JOIN procesos_maquinas pm ON m.id_maquina = pm.id_maquina
+GROUP BY m.nombre
+HAVING COUNT(pm.id_proceso) = 2;
+
+--47. Mostrar los productos que no han sido procesados aún
+SELECT p.nombre AS nombre_producto
+FROM productos p
+LEFT JOIN producto_proceso pp ON p.id_producto = pp.id_producto
+WHERE pp.id_proceso IS NULL;
+
+--48. Obtener las compras realizadas en el último mes
+SELECT co.id_compra, p.nombre_empresa AS proveedor, co.fecha_compra, co.total
+FROM compras co
+JOIN proveedores p ON co.id_proveedor = p.id_proveedor
+WHERE co.fecha_compra >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH);
+
+--49. Listar los empleados que han procesado más de 1 productos
+SELECT e.nombre AS nombre_empleado, COUNT(pp.id_proceso_producto) AS total_procesos
+FROM empleados e
+JOIN procesos_empleados pe ON e.id_empleado = pe.id_empleado
+JOIN producto_proceso pp ON pe.id_proceso = pp.id_proceso
+GROUP BY e.nombre
+HAVING COUNT(pp.id_proceso_producto) > 1;
+
+--50. Obtener los empleados que tienen un salario mayor al promedio
+SELECT e.nombre AS nombre_empleado, e.salario
+FROM empleados e
+WHERE e.salario > (SELECT AVG(salario) FROM empleados);
+
+--51. Mostrar los insumos más comprados
+SELECT i.nombre AS nombre_insumo, COUNT(p.id_pedido) AS total_pedidos
+FROM insumos i
+JOIN pedido p ON i.id_insumo = p.id_insumo
+GROUP BY i.nombre
+ORDER BY total_pedidos DESC;
+
+--52. Obtener las fincas que tienen inventarios registrados
+SELECT f.nombre AS nombre_finca, i.nombre AS nombre_inventario
+FROM finca f
+JOIN inventario i ON f.id_finca = i.id_finca;
+
+--53. Listar los empleados que han estado de vacaciones en el último año
+SELECT e.nombre AS nombre_empleado, v.fecha_vacaciones
+FROM empleados e
+JOIN vacaciones v ON e.id_empleado = v.id_empleado
+WHERE YEAR(v.fecha_vacaciones) = YEAR(CURDATE());
+
+--54. Mostrar los productos y su respectiva categoría de inventario
+SELECT p.nombre AS nombre_producto, ti.nombre AS tipo_inventario
+FROM productos p
+JOIN inventario i ON p.id_producto = i.id_inventario
+JOIN tipo_inventario ti ON i.id_tipo_inventario = ti.id_tipo_inventario;
+
+--55. Obtener los empleados cuyo pago está pendiente
+
+SELECT e.nombre AS nombre_empleado, pe.estado_pago
+FROM empleados e
+JOIN pago_empleados pe ON e.id_empleado = pe.id_empleado
+WHERE pe.estado_pago = 'Pendiente';
+
+----------------------------------------------------
+--CONSULTAS CON SUBCONSULTAS
+----------------------------------------------------
+
+--56. Obtener los productos cuyo precio es mayor al precio promedio por tipo de producto
+SELECT p.nombre, p.tipo_producto, pm.valor AS precio
+FROM productos p
+JOIN precio_venta_u_medida pm ON p.id_precio_venta_u_medida = pm.id_precio_venta_u_medida
+WHERE pm.valor > (SELECT AVG(pm2.valor) 
+                  FROM productos p2 
+                  JOIN precio_venta_u_medida pm2 ON p2.id_precio_venta_u_medida = pm2.id_precio_venta_u_medida 
+                  WHERE p.tipo_producto = p2.tipo_producto);
+
+--57. Mostrar los proveedores que han realizado compras con un valor total superior al promedio de compras realizadas por todos los proveedores
+SELECT p.nombre_empresa, SUM(c.total) AS total_compras
+FROM proveedores p
+JOIN compras c ON p.id_proveedor = c.id_proveedor
+GROUP BY p.nombre_empresa
+HAVING SUM(c.total) > (SELECT AVG(total) FROM compras);
+
+--58. Contar cuántos clientes han hecho compras mayores al promedio
+SELECT COUNT(*) AS total_clientes
+FROM clientes c
+WHERE EXISTS (SELECT 1 
+              FROM ventas v 
+              WHERE v.id_cliente = c.id_cliente AND v.total > (SELECT AVG(total) FROM ventas));
+
+--59. Mostrar las fincas que tienen al menos 3 empleados asignados a ellas
+
+SELECT f.nombre, COUNT(e.id_empleado) AS total_empleados
+FROM finca f
+JOIN empleados e ON f.id_finca = e.id_empleado
+GROUP BY f.nombre
+HAVING COUNT(e.id_empleado) >= 3;
+
+--60. Obtener el total de compras realizadas por cada proveedor durante el último año
+SELECT p.nombre_empresa, SUM(c.total) AS total_compras
+FROM proveedores p
+JOIN compras c ON p.id_proveedor = c.id_proveedor
+WHERE c.fecha_compra >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
+GROUP BY p.nombre_empresa;
+
+--61. Listar las ciudades que tienen al menos una finca con más de 5 compras realizadas
+SELECT ci.nombre AS ciudad, COUNT(c.id_compra) AS total_compras
+FROM ciudad ci
+JOIN direccion d ON ci.id_ciudad = d.id_ciudad
+JOIN finca f ON d.id_direccion = f.id_direccion
+JOIN proveedores p ON f.id_finca = p.id_finca
+JOIN compras c ON p.id_proveedor = c.id_proveedor
+GROUP BY ci.nombre
+HAVING COUNT(c.id_compra) > 5;
+
+--62. Obtener los empleados que han recibido el salario más alto en los últimos 3 meses:
+SELECT e.nombre, MAX(pe.fecha_pago) AS ultima_fecha_pago, e.salario
+FROM empleados e
+JOIN pago_empleados pe ON e.id_empleado = pe.id_empleado
+WHERE pe.fecha_pago >= DATE_SUB(CURDATE(), INTERVAL 3 MONTH)  
+GROUP BY e.nombre, e.salario
+ORDER BY e.salario DESC
+LIMIT 5;  
+
+
+--63:Obtener el total de productos comprados por cada proveedor en el último año:
+SELECT p.nombre_empresa AS proveedor, COUNT(c.id_compra) AS total_compras
+FROM proveedores p
+JOIN compras c ON p.id_proveedor = c.id_proveedor
+WHERE c.fecha_compra >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)  
+GROUP BY p.id_proveedor, p.nombre_empresa
+HAVING COUNT(c.id_compra) > 0  
+ORDER BY total_compras DESC;
+
+
+--64. Obtener los clientes que han realizado al menos una compra de más de $1000
+
+SELECT c.nombre
+FROM clientes c
+WHERE EXISTS (SELECT 1 
+              FROM ventas v 
+              WHERE v.id_cliente = c.id_cliente AND v.total > 1000);
+
+
+--65. Obtener el total de compras realizadas por cada proveedor y el monto total gastado en cada uno
+
+SELECT p.nombre_empresa AS proveedor, 
+       COUNT(c.id_compra) AS total_compras, 
+       SUM(c.total) AS total_gastado
+FROM proveedores p
+JOIN compras c ON p.id_proveedor = c.id_proveedor
+GROUP BY p.id_proveedor, p.nombre_empresa
+HAVING COUNT(c.id_compra) > 0  
+ORDER BY total_gastado DESC;
+
