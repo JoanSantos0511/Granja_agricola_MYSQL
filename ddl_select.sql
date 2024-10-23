@@ -42,13 +42,13 @@ WHERE ev.estado = 'Pendiente';
 SELECT v.id_venta, v.fecha_venta, v.total
 FROM ventas v
 JOIN empleados e ON v.id_empleado = e.id_empleado
-WHERE e.nombre = 'Nombre del Empleado'; 
+WHERE e.nombre = 'José Pérez'; 
 
 --12. Mostrar los insumos utilizados en los procesos de producción
 
 SELECT i.nombre AS insumo, p.nombre AS proceso
 FROM insumos i
-JOIN producto_proceso pp ON i.id_insumo = pp.id_producto -- Si los insumos están relacionados con los productos
+JOIN producto_proceso pp ON i.id_insumo = pp.id_producto 
 JOIN procesos p ON pp.id_proceso = p.id_proceso;
 
 --13. Listar los tipos de procesos productivos registrados
@@ -67,7 +67,7 @@ JOIN insumos i ON c.id_proveedor = i.id_insumo;
 SELECT v.id_venta, v.fecha_venta, v.total
 FROM ventas v
 JOIN clientes c ON v.id_cliente = c.id_cliente
-WHERE c.nombre = 'Nombre del Cliente'; 
+WHERE c.nombre = 'Luis González'; 
 
 --16. Mostrar las máquinas utilizadas en cada proceso productivo
 
@@ -82,14 +82,14 @@ SELECT e.nombre AS empleado, p.nombre AS proceso
 FROM empleados e
 JOIN procesos_empleados pe ON e.id_empleado = pe.id_empleado
 JOIN procesos p ON pe.id_proceso = p.id_proceso
-WHERE e.nombre = 'Nombre del Empleado'; 
+WHERE e.nombre = 'Raúl Castro'; 
 
 --18. Listar las compras realizadas a un proveedor específico
 
 SELECT c.id_compra, c.fecha_compra, c.total
 FROM compras c
 JOIN proveedores p ON c.id_proveedor = p.id_proveedor
-WHERE p.nombre_empresa = 'Nombre del Proveedor';
+WHERE p.nombre_empresa = 'Productores Locales';
 
 -- 19. Mostrar el inventario disponible en una finca específica
 SELECT i.nombre AS inventario, f.nombre AS finca
@@ -108,7 +108,7 @@ ORDER BY salario DESC;
 SELECT e.nombre AS empleado, p.fecha_pago, p.estado_pago
 FROM pago_empleados p
 JOIN empleados e ON p.id_empleado = e.id_empleado
-WHERE p.fecha_pago BETWEEN 'YYYY-MM-DD' AND 'YYYY-MM-DD'; -- Reemplazar por el rango de fechas deseado
+WHERE p.fecha_pago BETWEEN 'YYYY-MM-DD' AND 'YYYY-MM-DD'; 
 
 --22. Mostrar los procesos realizados por una máquina específica
 
@@ -116,7 +116,7 @@ SELECT m.nombre AS maquina, p.nombre AS proceso
 FROM maquinaria m
 JOIN procesos_maquinas pm ON m.id_maquina = pm.id_maquina
 JOIN procesos p ON pm.id_proceso = p.id_proceso
-WHERE m.nombre = 'Nombre de la Máquina'; -- Reemplazar 'Nombre de la Máquina' por el nombre específico
+WHERE m.nombre = 'Planta de Compostaje'; 
 
 
 --23. Obtener el inventario de un tipo específico (por ejemplo, maquinaria o productos)
@@ -124,22 +124,22 @@ WHERE m.nombre = 'Nombre de la Máquina'; -- Reemplazar 'Nombre de la Máquina' 
 SELECT i.nombre AS inventario, ti.nombre AS tipo_inventario
 FROM inventario i
 JOIN tipo_inventario ti ON i.id_tipo_inventario = ti.id_tipo_inventario
-WHERE ti.nombre = 'Tipo de Inventario'; -- Reemplazar 'Tipo de Inventario' por el tipo específico (e.g., 'maquinaria', 'productos')
+WHERE ti.nombre = 'Combustible'; 
 
 --24. Mostrar los pedidos realizados por un cliente específico
 
 SELECT p.id_pedido, c.nombre AS cliente, p.id_insumo
 FROM pedido p
 JOIN clientes c ON p.id_cliente = c.id_cliente
-WHERE c.nombre = 'Nombre del Cliente'; -- Reemplazar 'Nombre del Cliente' por el nombre específico
+WHERE c.nombre = 'Carlos Ramírez';
 
 
 --25. Listar los proveedores que suministran un insumo específico
 SELECT p.nombre_empresa AS proveedor, i.nombre AS insumo
 FROM proveedores p
 JOIN compras c ON p.id_proveedor = c.id_proveedor
-JOIN insumos i ON c.id_proveedor = i.id_insumo -- Si existe una relación directa, ajustar esta parte
-WHERE i.nombre = 'Nombre del Insumo'; -- Reemplazar 'Nombre del Insumo' por el nombre específico
+JOIN insumos i ON c.id_proveedor = i.id_insumo 
+WHERE i.nombre = 'Abono de nitrógeno'; 
 
 --26. Contar cuántos productos están registrados en la base de datos
 
@@ -190,7 +190,7 @@ GROUP BY c.nombre;
 SELECT SUM(c.total) AS total_compras
 FROM compras c
 JOIN proveedores p ON c.id_proveedor = p.id_proveedor
-WHERE p.nombre_empresa = 'Nombre del Proveedor'; -- Reemplazar 'Nombre del Proveedor' por el nombre específico
+WHERE p.nombre_empresa = 'Cosechas Locales'; 
 
 
 --35. Obtener el total de ventas por empleado
@@ -414,4 +414,102 @@ JOIN compras c ON p.id_proveedor = c.id_proveedor
 GROUP BY p.id_proveedor, p.nombre_empresa
 HAVING COUNT(c.id_compra) > 0  
 ORDER BY total_gastado DESC;
+
+--66. Mostrar los empleados que ganan más que el salario promedio de la granja
+SELECT nombre, salario
+FROM empleados
+WHERE salario > (
+    SELECT AVG(salario) 
+    FROM empleados
+);
+
+--67. Obtener los empleados que han trabajado en más de 1 procesos distintos
+SELECT e.nombre AS empleado, COUNT(pe.id_proceso) AS total_procesos
+FROM empleados e
+JOIN procesos_empleados pe ON e.id_empleado = pe.id_empleado
+GROUP BY e.id_empleado
+HAVING COUNT(pe.id_proceso) > 1;
+
+
+--68. Obtener los productos que han sido utilizados en procesos que involucran 2 o mas máquinas diferentes
+SELECT p.nombre AS producto, COUNT(DISTINCT pm.id_maquina) AS total_maquinas
+FROM productos p
+JOIN producto_proceso pp ON p.id_producto = pp.id_producto
+JOIN procesos pr ON pp.id_proceso = pr.id_proceso
+JOIN procesos_maquinas pm ON pr.id_proceso = pm.id_proceso
+GROUP BY p.id_producto
+HAVING COUNT(DISTINCT pm.id_maquina) >= 2;
+
+--69. Listar los empleados que han realizado más de 2 ventas en total
+
+SELECT e.nombre AS empleado, COUNT(v.id_venta) AS total_ventas
+FROM empleados e
+JOIN ventas v ON e.id_empleado = v.id_empleado
+GROUP BY e.id_empleado
+HAVING COUNT(v.id_venta) >= 2;
+
+--70. Mostrar las ventas cuyo total es superior al promedio de todas las ventas
+SELECT id_venta, total
+FROM ventas
+WHERE total > (
+    SELECT AVG(total)
+    FROM ventas
+);
+
+--71. Listar los productos que tienen el precio más alto
+SELECT nombre, valor
+FROM productos p
+JOIN precio_venta_u_medida pv ON p.id_precio_venta_u_medida = pv.id_precio_venta_u_medida
+WHERE pv.valor = (
+    SELECT MAX(valor)
+    FROM precio_venta_u_medida
+);
+
+--72. Obtener los clientes que han realizado la mayor cantidad de compras
+SELECT nombre, total_compras
+FROM clientes c
+JOIN (
+    SELECT id_cliente, COUNT(id_venta) AS total_compras
+    FROM ventas
+    GROUP BY id_cliente
+) v ON c.id_cliente = v.id_cliente
+ORDER BY total_compras DESC
+LIMIT 1;
+
+--73. Mostrar las máquinas utilizadas en procesos específicos
+SELECT m.nombre AS maquina, p.nombre AS proceso
+FROM maquinaria m
+JOIN procesos_maquinas pm ON m.id_maquina = pm.id_maquina
+JOIN procesos p ON pm.id_proceso = p.id_proceso
+WHERE p.id_proceso IN (
+    SELECT id_proceso 
+    FROM procesos 
+    WHERE nombre = 'Control de Plagas con Pesticidas'
+);
+
+--74. Listar los insumos más utilizados en los procesos de producción
+
+SELECT i.nombre AS insumo, COUNT(pp.id_proceso_producto) AS cantidad_usada
+FROM insumos i
+JOIN producto_proceso pp ON i.id_insumo = pp.id_producto
+GROUP BY i.id_insumo
+ORDER BY cantidad_usada DESC;
+
+--75. Mostrar las ventas realizadas por empleados que tienen un salario mayor al salario promedio
+
+SELECT v.id_venta, v.total, e.nombre AS empleado
+FROM ventas v
+JOIN empleados e ON v.id_empleado = e.id_empleado
+WHERE e.salario > (
+    SELECT AVG(salario) 
+    FROM empleados
+);
+
+--76. Listar los empleados cuyo salario está entre el 10% superior de los salarios
+SELECT e.nombre AS empleado, e.salario
+FROM empleados e
+WHERE e.salario > (
+    SELECT PERCENTILE_CONT(0.9) WITHIN GROUP (ORDER BY salario)
+    FROM empleados
+);
 
