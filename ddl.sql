@@ -1,4 +1,4 @@
--- Active: 1729024097209@@127.0.0.1@3306@granja_agricolaMYSQL
+-- Active: 1729309147950@@127.0.0.1@3306@granja_agricolamysql
 CREATE DATABASE granja_agricolaMYSQL;
 
 USE granja_agricolaMYSQL
@@ -88,6 +88,13 @@ CREATE TABLE reporte_gastos (
 CREATE TABLE tipo_inventario (
     id_tipo_inventario INTEGER PRIMARY KEY,
     nombre VARCHAR(100)
+);
+
+-- Tabla de notificaciones
+CREATE TABLE notificaciones (
+    id_notificacion INTEGER PRIMARY KEY,
+    mensaje VARCHAR(255) NOT NULL,
+    fecha DATETIME NOT NULL
 );
 
 -- Tabla empleados
@@ -268,7 +275,25 @@ CREATE TABLE pago_empleado_empleados (
     FOREIGN KEY (id_empleado) REFERENCES empleados(id_empleado)
 );
 
+-- Tabla de eventos
+CREATE TABLE eventos (
+    id_evento INTEGER PRIMARY KEY,
+    tipo_evento VARCHAR(100) NOT NULL,
+    descripcion TEXT NOT NULL,
+    fecha_evento DATETIME NOT NULL,
+    id_empleado INTEGER,
+    FOREIGN KEY (id_empleado) REFERENCES empleados(id_empleado)
+);
 
+-- Tabla de asistencia_eventos
+CREATE TABLE asistencia_eventos (
+    id_asistencia_evento INTEGER PRIMARY KEY,
+    id_evento INTEGER,
+    id_empleado INTEGER,
+    estado_asistencia VARCHAR(50) NOT NULL,
+    FOREIGN KEY (id_evento) REFERENCES eventos(id_evento),
+    FOREIGN KEY (id_empleado) REFERENCES empleados(id_empleado)
+);
 
 
 
