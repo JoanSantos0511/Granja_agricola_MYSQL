@@ -24,6 +24,14 @@ La base de datos contiene las siguientes tablas:
 - **Empleados**: Información sobre los empleados de la granja.
 - **Vacaciones**: Registro de las vacaciones de los empleados.
 
+
+## Descarga del Diagrama
+
+Puedes descargar el diagrama de la base de datos en formato StarUML desde el siguiente enlace:
+
+[Descargar Diagrama de StarUML](diseño_finca.mdj)
+
+
 ## Configuración de la Base de Datos
 
 Para configurar la base de datos, sigue estos pasos:
@@ -206,6 +214,7 @@ BEGIN
     SELECT COUNT(*) INTO v_numero_empleados
     FROM empleados
     WHERE id_estado_empleado = 1; 
+
     RETURN v_numero_empleados;
 END//
 DELIMITER ;
@@ -449,3 +458,37 @@ END//
 DELIMITER ;
 ```
 
+## Descripción de Usuarios 🧑‍🌾
+
+El sistema de gestión de la base de datos de la granja está diseñado para diferentes tipos de usuarios, cada uno con roles y permisos específicos. A continuación se detallan los tipos de usuarios y sus funciones:
+
+### 1. Administrador
+- **Descripción**: Este usuario tiene acceso completo a todas las funcionalidades del sistema. Es responsable de la gestión de otros usuarios, configuración del sistema y supervisión general de las operaciones de la granja.
+- **Permisos**:
+  - Crear, leer, actualizar y eliminar registros en todas las tablas.
+  - Gestionar la asignación de roles y permisos a otros usuarios.
+
+### 2. Empleado
+- **Descripción**: Este usuario representa al personal que trabaja en la granja. Tiene acceso a funcionalidades relacionadas con su trabajo diario, como registrar procesos y gestionar la asistencia a eventos.
+- **Permisos**:
+  - Leer registros relacionados con las actividades asignadas.
+  - Registrar su propia asistencia a eventos.
+  - Actualizar información personal.
+
+### 3. Proveedor
+- **Descripción**: Este usuario representa a los proveedores de insumos y materiales para la granja. Puede acceder a información relacionada con sus productos y compras realizadas.
+- **Permisos**:
+  - Leer registros de compras y productos asociados.
+  - Actualizar información sobre sus productos.
+
+### 4. Gerente
+- **Descripción**: Este usuario tiene un rol intermedio, supervisando a los empleados y gestionando las operaciones diarias de la granja. Puede acceder a reportes y estadísticas de rendimiento.
+- **Permisos**:
+  - Leer y actualizar registros de empleados, insumos y procesos.
+  - Generar reportes sobre actividades de la granja.
+
+### 5. Contable
+- **Descripción**: Este usuario se encarga de las finanzas de la granja. Tiene acceso a registros de compras, pagos y reportes de gastos.
+- **Permisos**:
+  - Leer y actualizar registros de pagos y reportes de gastos.
+  - Gestionar información relacionada con las transacciones financieras.
