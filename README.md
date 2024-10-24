@@ -158,6 +158,59 @@ DELIMITER ;
 
 ```
 
+**Función para estimar el costo operativo total de la finca en un periodo de tiempo**
+
+```sql
+DELIMITER //
+CREATE FUNCTION estimar_costo_operativo(p_fecha_inicio DATE, p_fecha_fin DATE)
+RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN
+    DECLARE v_total DECIMAL(10,2);
+    SELECT SUM(total) INTO v_total
+    FROM reporte_gastos
+    WHERE fecha_reporte BETWEEN p_fecha_inicio AND p_fecha_fin;
+    RETURN v_total;
+END//
+DELIMITER ;
+
+```
+
+**Función para obtener el total de ventas realizadas en un periodo**
+
+```sql
+DELIMITER //
+CREATE FUNCTION total_ventas_periodo(p_fecha_inicio DATE, p_fecha_fin DATE)
+RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN
+    DECLARE v_total_ventas DECIMAL(10,2);
+    SELECT SUM(total) INTO v_total_ventas
+    FROM ventas
+    WHERE fecha_venta BETWEEN p_fecha_inicio AND p_fecha_fin;
+    RETURN v_total_ventas;
+END//
+DELIMITER ;
+
+```
+
+**Función para contar el número de empleados activos**
+
+```sql
+DELIMITER //
+CREATE FUNCTION contar_empleados_activos()
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE v_numero_empleados INT;
+    SELECT COUNT(*) INTO v_numero_empleados
+    FROM empleados
+    WHERE id_estado_empleado = 1; 
+    RETURN v_numero_empleados;
+END//
+DELIMITER ;
+```
+
 ## 💻 Triggers SQL Documentados
 
 **Trigger para evitar que el total de ventas sea menor al costo de producción**
