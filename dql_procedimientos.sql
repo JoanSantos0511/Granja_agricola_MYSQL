@@ -264,3 +264,4 @@ BEGIN
     VALUES (p_id_empleado, p_fecha_pago, p_estado_pago);
 END//
 DELIMITER ;
+
