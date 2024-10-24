@@ -25,12 +25,10 @@ La base de datos contiene las siguientes tablas:
 - **Vacaciones**: Registro de las vacaciones de los empleados.
 
 
-## Descarga del Diagrama
+## Diagrama de Base de Datos
 
-Puedes descargar el diagrama de la base de datos en formato StarUML desde el siguiente enlace:
-
-[Descargar Diagrama de StarUML](diseño_finca.mdj)
-
+![Descripción de la Parte 1](diagrama_finca_1.jpg)
+![Descripción de la Parte 2](diagrama_finca_2.jpg)
 
 ## Configuración de la Base de Datos
 
@@ -126,6 +124,50 @@ JOIN pedido ped ON i.id_insumo = ped.id_insumo
 JOIN ventas v ON ped.id_venta = v.id_venta
 GROUP BY i.id_insumo
 ORDER BY total_gastado_en_insumo DESC;
+```
+
+**Obtener el total de gastos reportados en todos los reportes de gastos**
+```sql
+SELECT SUM(rg.total) AS total_gastos
+FROM reporte_gastos rg;
+
+```
+
+**Listar las fechas de vacaciones de los empleados**
+```sql
+SELECT e.nombre, v.fecha_vacaciones
+FROM empleados e
+JOIN vacaciones v ON e.id_empleado = v.id_empleado;
+
+```
+
+**Obtener el nombre de los productos que están asociados a procesos.**
+```sql
+SELECT p.nombre AS producto
+FROM productos p
+JOIN producto_proceso pp ON p.id_producto = pp.id_producto;
+
+```
+
+**istar los empleados y su estado actual (empleado activo o no).**
+```sql
+SELECT e.nombre, ee.estado
+FROM empleados e
+JOIN estados_empleados ee ON e.id_estado_empleado = ee.id_estado_empleado;
+
+
+```
+
+**Obtener la lista de empleados y su salario, junto con el promedio de salario de su respectivo cargo.**
+```sql
+SELECT e.nombre, e.salario, c.nombre AS cargo, 
+       (SELECT AVG(salario) 
+        FROM empleados 
+        WHERE id_cargo = e.id_cargo) AS promedio_salario
+FROM empleados e
+JOIN Cargo c ON e.id_cargo = c.id_cargo;
+
+
 ```
 
 ## 📌 Funciones SQL
